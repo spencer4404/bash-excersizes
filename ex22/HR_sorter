@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# Put your code here
+# You may only use the following external programs: ls, echo, awk, cat, grep, sort, wc, bc
+
+# Inititalize my results array
+results=()
+
+# Get the keyword and weight using awk
+for file in submissions/*; do
+	total_score=0
+
+	# Loop through the input words
+	while read -r line;do
+		# Get keyword and weight, strip the extra whitespace
+		keyword=$(echo "$line" | awk '{$NF=""; sub(/[[:space:]]+$/, "");  print $0}')
+		weight=$(echo "$line" | awk '{print $NF}')
+		# Count the amount of keywords in the file
+		count=$(grep -io "$keyword" "$file" | wc -l)
+
+		# get the score for the current keyword
+		score=$(echo "$count * $weight" | bc)
+
+		# add the current score to the total score
+		total_score=$(echo "$total_score + $score" | bc)
+	# Run this loop with the input.txt file
+	done < input.txt
+
+	# get rid of submission/ before the file name 
+	filename=${file##*/}
+
+	# Add to the array
+	results+=("$total_score $filename")
+done
+
+# Print them in sorted order
+for result in "${results[@]}"; do
+	echo "$result"
+done | sort -grk1
+
+
